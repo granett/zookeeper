@@ -37,18 +37,20 @@ public class ZookeeperTest {
         }
     }
 
-    public void create() throws Exception{
+    public static void create() throws Exception{
     	zk.create("/zx", "aaa".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-    	String value = new String(zk.getData("/zx", false, null));
+    	String value = zk.getData("/zx", false, null).toString();
     	System.out.println(value);
+    	Stat stat = zk.exists("/zx1", false);
+    	System.out.println(stat);
     }
     
     public static void update() throws Exception{
     	zk.create("/zx1", "aaa".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-    	String value = new String(zk.getData("/zx1", false, null));
+    	String value = new String(zk.getData("/zx1", false, null).toString());
     	System.out.println(value);
     	zk.setData("/zx1", "bbb".getBytes(),-1);
-    	value = new String(zk.getData("/zx1", false, null));
+    	value = new String(zk.getData("/zx1", false, null).toString());
     	System.out.println(value);
     }
     
@@ -57,7 +59,7 @@ public class ZookeeperTest {
     	String value = new String(zk.getData("/zx2", false, null));
     	System.out.println(value);
     	zk.delete("/zx2",0);
-    	value = new String(zk.getData("/zx2", false, null));
+    	value = new String(zk.getData("/zx2", false, null).toString());
     	System.out.println(value);
     }
     
@@ -65,14 +67,19 @@ public class ZookeeperTest {
     	zk.create("/zx3", "aaa".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
     	zk.exists("/zx3", new Watcher() {
             public void process(WatchedEvent watchedEvent) {
-                System.out.println(111);
-                System.out.println(watchedEvent.getPath());
-                System.out.println(watchedEvent.getState());
-                System.out.println(watchedEvent.getType());
+            	try {
+            		System.out.println("监听的节点有变化，触发事件");
+                    System.out.println(watchedEvent.getPath());
+                    System.out.println(watchedEvent.getState());
+                    System.out.println(watchedEvent.getType());
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+                
             }
         });
+    	//通过删除/zx3节点来触发watcher事件
     	zk.delete("/zx3", -1);
-    	System.out.println(222);
     }
     
     public static void AsyncCallback() throws Exception{
@@ -92,10 +99,12 @@ public class ZookeeperTest {
 
     
     public static void main(String args[]) throws Exception{
-    	update();
+//    	create();
+//    	update();
 //    	delete();
-//    	watch();
+    	watch();
 //    	AsyncCallback();
+    	
     }
    
     
